@@ -201,6 +201,7 @@ function exportToCSV() {
   downloadBlob(csvContent, 'student_favorite_subjects_supabase.csv', 'text/csv;charset=utf-8;');
 }
 
+/* --- ฟังก์ชันสร้างไฟล์ .ipynb รูปแบบ Labsheet --- */
 function generateIpynbFile() {
   const notebookData = {
     cells: [
@@ -208,9 +209,23 @@ function generateIpynbFile() {
         cell_type: "markdown",
         metadata: {},
         source: [
-          "# รายงานการวิเคราะห์วิทยาศาสตร์ข้อมูล: วิชาที่ชอบเรียน\n",
-          "**จัดทำโดย:** กลุ่มโปรเจกต์วิทยาศาสตร์ข้อมูลโรงเรียน  \n",
-          "**ที่มาของข้อมูล:** ระบบฐานข้อมูล Supabase Realtime Database"
+          "# 🧪 ใบงานการทดลอง (Labsheet): การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
+          "**รายวิชา:** วิทยาศาสตร์ข้อมูลและการวิเคราะห์ (Data Science & Analytics)  \n",
+          "**แหล่งข้อมูล:** ฐานข้อมูลแบบ Realtime ผ่าน Supabase Data Collection System  \n",
+          "---\n",
+          "### 🎯 วัตถุประสงค์การทดลอง\n",
+          "1. **การนำเข้าข้อมูล (Data Ingestion):** อ่านข้อมูลไฟล์ CSV จากระบบสำรวจออนไลน์  \n",
+          "2. **การทำความสะอาดข้อมูล (Data Cleaning):** ตรวจสอบค่าสูญหายและลบรายการข้อมูลที่ซ้ำซ้อน  \n",
+          "3. **การวิเคราะห์สถิติ (Data Analysis):** คำนวณความถี่และเปรียบเทียบข้อมูลจำแนกตามเพศและระดับชั้น  \n",
+          "4. **การนำเสนอด้วยภาพ (Data Visualization):** สร้างกราฟสถิติที่แสดงผลภาษาไทยได้อย่างถูกต้อง"
+        ]
+      },
+      {
+        cell_type: "markdown",
+        metadata: {},
+        source: [
+          "## 📌 ขั้นตอนที่ 1: การเตรียมสภาพแวดล้อม และนำเข้าไลบรารี (Environment Setup)\n",
+          "ติดตั้งแพ็กเกจรองรับฟอนต์ภาษาไทย และนำเข้าไลบรารี `pandas`, `matplotlib`, `seaborn`"
         ]
       },
       {
@@ -219,25 +234,25 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 1. นำเข้าคลังไลบรารีที่จำเป็น\n",
+          "# ติดตั้งไลบรารีจัดการฟอนต์ภาษาไทยบน Google Colab\n",
+          "!pip install pythaifont -q\n",
+          "\n",
           "import pandas as pd\n",
           "import matplotlib.pyplot as plt\n",
           "import seaborn as sns\n",
+          "import pythaifont\n",
           "\n",
-          "# ตั้งค่ารูปแบบกราฟ\n",
+          "# เปิดใช้งานฟอนต์ภาษาไทย และตั้งค่าธีมกราฟ\n",
+          "pythaifont.setup_thai_font()\n",
           "sns.set_theme(style='whitegrid')"
         ]
       },
       {
-        cell_type: "code",
-        execution_count: null,
+        cell_type: "markdown",
         metadata: {},
-        outputs: [],
         source: [
-          "# 2. อ่านข้อมูลจาก CSV (ที่ Export จากระบบ Supabase Admin)\n",
-          "df = pd.read_csv('student_favorite_subjects_supabase.csv')\n",
-          "print('--- แสดงตัวอย่างข้อมูล 5 แถวแรก ---')\n",
-          "df.head()"
+          "## 📌 ขั้นตอนที่ 2: การนำเข้าข้อมูล (Data Ingestion)\n",
+          "โหลดไฟล์ CSV ที่ Export มาจากระบบ Admin เข้าสู่ Pandas DataFrame"
         ]
       },
       {
@@ -246,13 +261,48 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 3. ตรวจสอบคุณภาพข้อมูล (Data Cleaning & Quality Check)\n",
-          "print('ตรวจสอบค่าสูญหาย:')\n",
+          "# อ่านไฟล์ข้อมูล CSV\n",
+          "df = pd.read_csv('student_favorite_subjects_supabase.csv')\n",
+          "\n",
+          "print('--- ตัวอย่างข้อมูล 5 แถวแรก ---')\n",
+          "display(df.head())\n",
+          "\n",
+          "print('\\n--- รายละเอียดประเภทข้อมูลและขนาด ---')\n",
+          "df.info()"
+        ]
+      },
+      {
+        cell_type: "markdown",
+        metadata: {},
+        source: [
+          "## 📌 ขั้นตอนที่ 3: การสำรวจและทำความสะอาดข้อมูล (Data Exploration & Cleaning)\n",
+          "ตรวจสอบค่าที่หายไป (Missing Values) และกรองรายการชื่อซ้ำออก"
+        ]
+      },
+      {
+        cell_type: "code",
+        execution_count: null,
+        metadata: {},
+        outputs: [],
+        source: [
+          "# 3.1 เช็กค่าว่างในแต่ละคอลัมน์\n",
+          "print('จำนวนค่าว่าง (Null Count):')\n",
           "print(df.isnull().sum())\n",
           "\n",
-          "print('\\nตรวจสอบข้อมูลซ้ำซ้อน:', df.duplicated(subset=['ชื่อ-นามสกุล']).sum())\n",
-          "# ลบข้อมูลซ้ำถ้ามี\n",
-          "df = df.drop_duplicates(subset=['ชื่อ-นามสกุล'])"
+          "# 3.2 กรองข้อมูลที่ส่งซ้ำ โดยยึดคำตอบล่าสุด\n",
+          "before_clean = len(df)\n",
+          "df = df.drop_duplicates(subset=['ชื่อ-นามสกุล'], keep='last')\n",
+          "after_clean = len(df)\n",
+          "\n",
+          "print(f'\\nจำนวนข้อมูลก่อนคลีน: {before_clean} แถว | หลังคลีน: {after_clean} แถว')"
+        ]
+      },
+      {
+        cell_type: "markdown",
+        metadata: {},
+        source: [
+          "## 📌 ขั้นตอนที่ 4: การประมวลผลและการวิเคราะห์ข้อมูล (Data Processing)\n",
+          "คำนวณสรุปความนิยมในรายวิชา และตารางไขว้ (Cross-tabulation)"
         ]
       },
       {
@@ -261,10 +311,22 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 4. สรุปความถี่รายวิชา\n",
-          "subject_counts = df['วิชาที่ชอบ'].value_counts()\n",
-          "print('--- จำนวนนักเรียนจำแนกตามวิชาที่ชอบ ---')\n",
-          "print(subject_counts)"
+          "# 4.1 สรุปจำนวนนักเรียนจำแนกตามรายวิชาที่ชอบ\n",
+          "subject_counts = df['วิชาที่ชอบ'].value_counts().reset_index()\n",
+          "subject_counts.columns = ['วิชาที่ชอบ', 'จำนวน (คน)']\n",
+          "display(subject_counts)\n",
+          "\n",
+          "# 4.2 ตารางเปรียบเทียบความชอบจำแนกตามระดับชั้น\n",
+          "crosstab_result = pd.crosstab(df['ระดับชั้น'], df['วิชาที่ชอบ'], margins=True, margins_name='รวม')\n",
+          "display(crosstab_result)"
+        ]
+      },
+      {
+        cell_type: "markdown",
+        metadata: {},
+        source: [
+          "## 📌 ขั้นตอนที่ 5: การนำเสนอผลด้วยแผนภาพ (Data Visualization)\n",
+          "แสดงแผนภาพสรุปอันดับรายวิชายอดนิยม และเปรียบเทียบตามระดับชั้น"
         ]
       },
       {
@@ -273,35 +335,39 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 5. สร้างกราฟแท่งแสดงวิชาที่ชอบเรียนมากที่สุด\n",
-          "plt.figure(figsize=(10, 6))\n",
-          "ax = sns.countplot(data=df, y='วิชาที่ชอบ', order=df['วิชาที่ชอบ'].value_counts().index, palette='viridis')\n",
-          "plt.title('จำนวนนักเรียนจำแนกตามวิชาที่ชอบเรียน', fontsize=14, fontweight='bold')\n",
-          "plt.xlabel('จำนวนนักเรียน (คน)')\n",
-          "plt.ylabel('วิชาที่ชอบ')\n",
+          "# 5.1 แผนภูมิแท่งแสดงรายวิชายอดนิยม\n",
+          "plt.figure(figsize=(10, 5))\n",
+          "ax = sns.barplot(data=subject_counts, x='จำนวน (คน)', y='วิชาที่ชอบ', palette='mako')\n",
+          "plt.title('อันดับรายวิชาที่นักเรียนชอบเรียนมากที่สุด', fontsize=16, fontweight='bold', pad=15)\n",
+          "plt.xlabel('จำนวนนักเรียน (คน)', fontsize=12)\n",
+          "plt.ylabel('รายวิชา', fontsize=12)\n",
           "\n",
           "for p in ax.patches:\n",
-          "    ax.annotate(f'{int(p.get_width())}', (p.get_width() + 0.2, p.get_y() + p.get_height() / 2.), va='center')\n",
+          "    val = int(p.get_width())\n",
+          "    if val > 0:\n",
+          "        ax.annotate(f'{val} คน', (val + 0.1, p.get_y() + p.get_height() / 2.), va='center')\n",
           "\n",
+          "plt.tight_layout()\n",
+          "plt.show()\n",
+          "\n",
+          "# 5.2 แผนภูมิแท่งเปรียบเทียบตามระดับชั้น\n",
+          "plt.figure(figsize=(12, 6))\n",
+          "sns.countplot(data=df, x='ระดับชั้น', hue='วิชาที่ชอบ', palette='Set2')\n",
+          "plt.title('วิชาที่ชอบจำแนกตามระดับชั้นการศึกษา', fontsize=16, fontweight='bold', pad=15)\n",
+          "plt.xlabel('ระดับชั้น', fontsize=12)\n",
+          "plt.ylabel('จำนวนนักเรียน (คน)', fontsize=12)\n",
+          "plt.legend(title='รายวิชา', bbox_to_anchor=(1.05, 1), loc='upper left')\n",
           "plt.tight_layout()\n",
           "plt.show()"
         ]
       },
       {
-        cell_type: "code",
-        execution_count: null,
+        cell_type: "markdown",
         metadata: {},
-        outputs: [],
         source: [
-          "# 6. วิเคราะห์เปรียบเทียบวิชาที่ชอบตามระดับชั้น (Cross-tabulation)\n",
-          "crosstab_data = pd.crosstab(df['ระดับชั้น'], df['วิชาที่ชอบ'])\n",
-          "crosstab_data.plot(kind='bar', stacked=True, figsize=(12, 6), colormap='Accent')\n",
-          "plt.title('สัดส่วนวิชาที่ชอบเรียนจำแนกตามระดับชั้น', fontsize=14, fontweight='bold')\n",
-          "plt.xlabel('ระดับชั้น')\n",
-          "plt.ylabel('จำนวนนักเรียน (คน)')\n",
-          "plt.legend(title='วิชาที่ชอบ', bbox_to_anchor=(1.05, 1))\n",
-          "plt.tight_layout()\n",
-          "plt.show()"
+          "## 📌 ขั้นตอนที่ 6: สรุปผลการทดลอง (Conclusion)\n",
+          "- **สรุปผลวิเคราะห์:** จากการประมวลผลข้อมูล สามารถระบุอันดับวิชาที่นักเรียนให้ความสนใจมากที่สุดได้อย่างชัดเจน  \n",
+          "- **ประโยชน์และการนำไปใช้:** ข้อมูลนี้สามารถนำไปใช้วางแผนจัดตารางเรียน คอร์สเสริม หรือกิจกรรมชมรมให้สอดคล้องกับความต้องการของนักเรียน"
         ]
       }
     ],
