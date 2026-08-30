@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบสำรวจวิชาที่ชอบเรียน - Data Science Project</title>
+  
+  <!-- Google Font (Kanit) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['Kanit', 'sans-serif'],
+              },
+            },
+          },
+        };
+      }
+    });
+  </script>
+
+  <!-- เชื่อมต่อไฟล์ styles.css -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+  
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <svg class="w-7 h-7 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <span class="font-bold text-xl tracking-wide">Data Collection System</span>
+      </div>
+      <button onclick="openAdminModal()" class="bg-indigo-700 hover:bg-indigo-800 text-white text-sm px-4 py-2 rounded-xl font-medium shadow hover:shadow-indigo-900/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 cursor-pointer">
+        Admin Login
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Survey Form Container -->
+  <main class="max-w-2xl mx-auto my-10 p-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900">แบบสำรวจวิชาที่ชอบเรียน</h1>
+      <p class="text-slate-500 text-sm mt-2">บันทึกข้อมูลเข้าฐานข้อมูล Supabase</p>
+    </div>
+
+    <form id="surveyForm" class="space-y-6" onsubmit="handleFormSubmit(event)">
+      <!-- 1. เพศ (Custom Dropdown) -->
+      <div class="relative custom-select-container">
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">1. เพศ <span class="text-red-500">*</span></label>
+        <input type="hidden" id="gender" required>
+        <button type="button" id="genderBtn" onclick="toggleDropdown(event, 'genderMenu')" class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 hover:border-indigo-400 outline-none transition-all duration-200 flex justify-between items-center text-slate-700 text-left cursor-pointer">
+          <span id="genderLabel" class="text-slate-400">-- กรุณาเลือกเพศ --</span>
+          <svg id="genderArrow" class="w-5 h-5 text-indigo-500 transition-transform duration-200 dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <div id="genderMenu" class="dropdown-menu absolute z-30 w-full mt-2 bg-white border-2 border-black rounded-2xl shadow-xl overflow-hidden divide-y divide-black">
+          <div onclick="selectOption('gender', 'ชาย', 'genderLabel', 'genderMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">ชาย</div>
+          <div onclick="selectOption('gender', 'หญิง', 'genderLabel', 'genderMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">หญิง</div>
+          <div onclick="selectOption('gender', 'ไม่ต้องการระบุ', 'genderLabel', 'genderMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">ไม่ต้องการระบุ</div>
+        </div>
+      </div>
+
+      <!-- 2. ชื่อ-นามสกุล -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">2. ชื่อ - นามสกุล (มีคำนำหน้า) <span class="text-red-500">*</span></label>
+        <input type="text" id="fullname" required class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 hover:border-indigo-400 outline-none transition-all duration-200 text-slate-700 placeholder:text-slate-400" placeholder="เช่น นายสมชาย ใจดี / นางสาวสมหญิง รักดี">
+      </div>
+
+      <!-- 3. ระดับชั้นการศึกษา (Custom Dropdown) -->
+      <div class="relative custom-select-container">
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">3. ระดับชั้นการศึกษา <span class="text-red-500">*</span></label>
+        <input type="hidden" id="grade" required>
+        <button type="button" id="gradeBtn" onclick="toggleDropdown(event, 'gradeMenu')" class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 hover:border-indigo-400 outline-none transition-all duration-200 flex justify-between items-center text-slate-700 text-left cursor-pointer">
+          <span id="gradeLabel" class="text-slate-400">-- กรุณาเลือกระดับชั้น --</span>
+          <svg id="gradeArrow" class="w-5 h-5 text-indigo-500 transition-transform duration-200 dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <div id="gradeMenu" class="dropdown-menu absolute z-30 w-full mt-2 bg-white border-2 border-black rounded-2xl shadow-xl overflow-hidden divide-y divide-black max-h-56 overflow-y-auto">
+          <div onclick="selectOption('grade', 'ม.1', 'gradeLabel', 'gradeMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">มัธยมศึกษาปีที่ 1</div>
+          <div onclick="selectOption('grade', 'ม.2', 'gradeLabel', 'gradeMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">มัธยมศึกษาปีที่ 2</div>
+          <div onclick="selectOption('grade', 'ม.3', 'gradeLabel', 'gradeMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">มัธยมศึกษาปีที่ 3</div>
+          <div onclick="selectOption('grade', 'ม.4', 'gradeLabel', 'gradeMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">มัธยมศึกษาปีที่ 4</div>
+          <div onclick="selectOption('grade', 'ม.5', 'gradeLabel', 'gradeMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">มัธยมศึกษาปีที่ 5</div>
+          <div onclick="selectOption('grade', 'ม.6', 'gradeLabel', 'gradeMenu')" class="px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors duration-150">มัธยมศึกษาปีที่ 6</div>
+        </div>
+      </div>
+
+      <!-- 4. รายวิชาที่ชอบ -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">4. รายวิชาที่ชอบ <span class="text-red-500">*</span></label>
+        <input type="text" id="favoriteSubject" required class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 hover:border-indigo-400 outline-none transition-all duration-200 text-slate-700 placeholder:text-slate-400" placeholder="พิมพ์รายวิชาที่ชอบเรียน (เช่น วิทยาการคำนวณ, ภาษาอังกฤษ)">
+      </div>
+
+      <!-- ปุ่ม Submit -->
+      <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/35 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 cursor-pointer mt-2">
+        บันทึกข้อมูล
+      </button>
+    </form>
+
+    <div id="statusAlert" class="hidden mt-6 p-4 rounded-xl text-center text-sm font-medium transition-all duration-300"></div>
+  </main>
+
+  <!-- Admin Modal -->
+  <div id="adminModal" class="fixed inset-0 bg-slate-900/60 hidden backdrop-blur-sm flex justify-center items-center z-50 transition-opacity duration-300">
+    <div id="adminModalCard" class="bg-white p-7 rounded-3xl w-full max-w-sm shadow-2xl border border-slate-100 animate-pop-in">
+      <h2 class="text-xl font-bold text-slate-800 mb-4">เข้าสู่ระบบ Admin</h2>
+      <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-5 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 hover:border-indigo-400 outline-none transition-all duration-200">
+      <div class="flex justify-end space-x-3">
+        <button onclick="closeAdminModal()" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium active:scale-95 transition duration-150 cursor-pointer">ยกเลิก</button>
+        <button onclick="loginAdmin()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md hover:shadow-indigo-600/20 active:scale-95 transition-all duration-150 cursor-pointer">เข้าสู่ระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Container -->
+  <div id="adminDashboard" class="hidden max-w-6xl mx-auto my-10 p-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 animate-pop-in">
+    <div class="flex flex-wrap justify-between items-center mb-6 pb-6 border-b border-slate-100 gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800">Admin Dashboard - Supabase Realtime Data</h2>
+        <p class="text-sm text-slate-500 mt-1">จำนวนข้อมูลในฐานข้อมูล: <span id="recordCount" class="font-bold text-indigo-600">0</span> คน</p>
+      </div>
+      
+      <div class="flex flex-wrap gap-3">
+        <button onclick="generateIpynbFile()" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 flex items-center space-x-2 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>สร้างไฟล์ .ipynb (Notebook)</span>
+        </button>
+        
+        <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 flex items-center space-x-2 cursor-pointer">
+          <span>ดาวน์โหลด CSV</span>
+        </button>
+
+        <button onclick="logoutAdmin()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2.5 rounded-xl active:scale-95 transition-all duration-150 cursor-pointer">
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto rounded-2xl border border-slate-100 shadow-sm">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider font-semibold">
+            <th class="py-3.5 px-4 border-b border-slate-200">ID</th>
+            <th class="py-3.5 px-4 border-b border-slate-200">เพศ</th>
+            <th class="py-3.5 px-4 border-b border-slate-200">ชื่อ-นามสกุล</th>
+            <th class="py-3.5 px-4 border-b border-slate-200">ระดับชั้น</th>
+            <th class="py-3.5 px-4 border-b border-slate-200">วิชาที่ชอบ</th>
+            <th class="py-3.5 px-4 border-b border-slate-200">เวลาบันทึก</th>
+            <th class="py-3.5 px-4 border-b border-slate-200 text-center">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="dataTable" class="divide-y divide-slate-100 text-sm">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="supabaseClient.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
