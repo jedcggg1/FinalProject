@@ -10,7 +10,6 @@ body {
   background-color: #f8fafc;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -29,7 +28,6 @@ body {
   background: #94a3b8;
 }
 
-/* --- Dropdown Animation (ควบคุมการเปิด-ปิดผ่าน Class active) --- */
 .dropdown-menu {
   opacity: 0;
   visibility: hidden;
@@ -38,7 +36,6 @@ body {
   pointer-events: none;
 }
 
-/* แสดงเมนูเมื่อมี class active (เมื่อกดคลิก) */
 .dropdown-menu.active {
   opacity: 1;
   visibility: visible;
@@ -46,12 +43,10 @@ body {
   pointer-events: auto;
 }
 
-/* หมุนลูกศรเมื่อเปิดเมนู */
 .dropdown-arrow.rotate-180 {
   transform: rotate(180deg);
 }
 
-/* --- Admin Modal & Dashboard Entrance Animation --- */
 @keyframes popIn {
   0% {
     opacity: 0;

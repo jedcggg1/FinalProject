@@ -44,7 +44,6 @@ async function handleFormSubmit(e) {
   }
 }
 
-/* --- ฟังก์ชันควบคุม Custom Dropdown --- */
 function toggleDropdown(event, menuId) {
   event.stopPropagation();
   const menu = document.getElementById(menuId);
@@ -85,14 +84,12 @@ function resetCustomDropdowns() {
   document.getElementById('gradeLabel').className = 'text-slate-400';
 }
 
-/* ปิด Dropdown เมื่อคลิกพื้นที่อื่นภายนอก */
 window.addEventListener('click', function(e) {
   if (!e.target.closest('.custom-select-container')) {
     closeAllDropdowns();
   }
 });
 
-/* --- ฟังก์ชันระบบแจ้งเตือน และ Admin --- */
 function showAlert(message, styles) {
   const alertBox = document.getElementById('statusAlert');
   alertBox.className = `mt-6 p-4 rounded-xl text-center text-sm font-medium transition-all duration-300 ${styles}`;
@@ -114,9 +111,21 @@ function closeAdminModal() {
   document.getElementById('adminModal').classList.add('hidden'); 
 }
 
-function loginAdmin() {
-  const pwd = document.getElementById('adminPassword').value;
-  if (pwd === "20050609") {
+async function hashPassword(string) {
+  const utf8 = new TextEncoder().encode(string);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+async function loginAdmin() {
+  const pwdInput = document.getElementById('adminPassword').value;
+  const hashedInput = await hashPassword(pwdInput);
+
+  const TARGET_HASH = "a743a57ca5041a9bcaccc1c27bf88f343469ee9ebbe86a070da8cce3bcbc432c";
+
+  if (hashedInput === TARGET_HASH) {
     closeAdminModal();
     const dashboard = document.getElementById('adminDashboard');
     dashboard.classList.remove('hidden');
@@ -201,7 +210,6 @@ function exportToCSV() {
   downloadBlob(csvContent, 'student_favorite_subjects_supabase.csv', 'text/csv;charset=utf-8;');
 }
 
-/* --- ฟังก์ชันสร้างไฟล์ .ipynb รูปแบบ Labsheet --- */
 function generateIpynbFile() {
   const notebookData = {
     cells: [
@@ -234,7 +242,6 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# ติดตั้งไลบรารีจัดการฟอนต์ภาษาไทยบน Google Colab\n",
           "!pip install pythaifont -q\n",
           "\n",
           "import pandas as pd\n",
@@ -242,7 +249,6 @@ function generateIpynbFile() {
           "import seaborn as sns\n",
           "import pythaifont\n",
           "\n",
-          "# เปิดใช้งานฟอนต์ภาษาไทย และตั้งค่าธีมกราฟ\n",
           "pythaifont.setup_thai_font()\n",
           "sns.set_theme(style='whitegrid')"
         ]
@@ -261,7 +267,6 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# อ่านไฟล์ข้อมูล CSV\n",
           "df = pd.read_csv('student_favorite_subjects_supabase.csv')\n",
           "\n",
           "print('--- ตัวอย่างข้อมูล 5 แถวแรก ---')\n",
@@ -285,11 +290,9 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 3.1 เช็กค่าว่างในแต่ละคอลัมน์\n",
           "print('จำนวนค่าว่าง (Null Count):')\n",
           "print(df.isnull().sum())\n",
           "\n",
-          "# 3.2 กรองข้อมูลที่ส่งซ้ำ โดยยึดคำตอบล่าสุด\n",
           "before_clean = len(df)\n",
           "df = df.drop_duplicates(subset=['ชื่อ-นามสกุล'], keep='last')\n",
           "after_clean = len(df)\n",
@@ -311,12 +314,10 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 4.1 สรุปจำนวนนักเรียนจำแนกตามรายวิชาที่ชอบ\n",
           "subject_counts = df['วิชาที่ชอบ'].value_counts().reset_index()\n",
           "subject_counts.columns = ['วิชาที่ชอบ', 'จำนวน (คน)']\n",
           "display(subject_counts)\n",
           "\n",
-          "# 4.2 ตารางเปรียบเทียบความชอบจำแนกตามระดับชั้น\n",
           "crosstab_result = pd.crosstab(df['ระดับชั้น'], df['วิชาที่ชอบ'], margins=True, margins_name='รวม')\n",
           "display(crosstab_result)"
         ]
@@ -335,7 +336,6 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "# 5.1 แผนภูมิแท่งแสดงรายวิชายอดนิยม\n",
           "plt.figure(figsize=(10, 5))\n",
           "ax = sns.barplot(data=subject_counts, x='จำนวน (คน)', y='วิชาที่ชอบ', palette='mako')\n",
           "plt.title('อันดับรายวิชาที่นักเรียนชอบเรียนมากที่สุด', fontsize=16, fontweight='bold', pad=15)\n",
@@ -350,7 +350,6 @@ function generateIpynbFile() {
           "plt.tight_layout()\n",
           "plt.show()\n",
           "\n",
-          "# 5.2 แผนภูมิแท่งเปรียบเทียบตามระดับชั้น\n",
           "plt.figure(figsize=(12, 6))\n",
           "sns.countplot(data=df, x='ระดับชั้น', hue='วิชาที่ชอบ', palette='Set2')\n",
           "plt.title('วิชาที่ชอบจำแนกตามระดับชั้นการศึกษา', fontsize=16, fontweight='bold', pad=15)\n",
