@@ -111,21 +111,18 @@ function closeAdminModal() {
   document.getElementById('adminModal').classList.add('hidden'); 
 }
 
-async function hashPassword(string) {
-  const utf8 = new TextEncoder().encode(string);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
-}
-
 async function loginAdmin() {
-  const pwdInput = document.getElementById('adminPassword').value;
-  const hashedInput = await hashPassword(pwdInput);
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value;
 
-  const TARGET_HASH = "a743a57ca5041a9bcaccc1c27bf88f343469ee9ebbe86a070da8cce3bcbc432c";
+  const { data, error } = await _supabase.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
 
-  if (hashedInput === TARGET_HASH) {
+  if (error) {
+    alert("เข้าสู่ระบบไม่สำเร็จ: " + error.message);
+  } else {
     closeAdminModal();
     const dashboard = document.getElementById('adminDashboard');
     dashboard.classList.remove('hidden');
@@ -133,13 +130,13 @@ async function loginAdmin() {
     void dashboard.offsetWidth;
     dashboard.classList.add('animate-pop-in');
     loadAdminData();
-  } else {
-    alert("รหัสผ่านไม่ถูกต้อง");
   }
 }
 
-function logoutAdmin() {
+async function logoutAdmin() {
+  await _supabase.auth.signOut();
   document.getElementById('adminDashboard').classList.add('hidden');
+  document.getElementById('adminEmail').value = '';
   document.getElementById('adminPassword').value = '';
 }
 
