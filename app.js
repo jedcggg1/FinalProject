@@ -221,7 +221,7 @@ function generateIpynbFile() {
           "### 🎯 วัตถุประสงค์การทดลอง\n",
           "1. **การนำเข้าข้อมูล (Data Ingestion):** อ่านข้อมูลไฟล์ CSV จากระบบสำรวจออนไลน์  \n",
           "2. **การทำความสะอาดข้อมูล (Data Cleaning):** ตรวจสอบค่าสูญหายและลบรายการข้อมูลที่ซ้ำซ้อน  \n",
-          "3. **การวิเคราะห์สถิติ (Data Analysis):** คำนวณความถี่และเปรียบเทียบข้อมูลจำแนกตามเพศและระดับชั้น  \n",
+          "3. **การวิเคราะห์สถิติ (Data Analysis):** แยกข้อความและคำนวณความถี่ข้อมูลจำแนกตามเพศและระดับชั้น  \n",
           "4. **การนำเสนอด้วยภาพ (Data Visualization):** สร้างกราฟสถิติที่แสดงผลภาษาไทยได้อย่างถูกต้อง"
         ]
       },
@@ -302,7 +302,7 @@ function generateIpynbFile() {
         metadata: {},
         source: [
           "## 📌 ขั้นตอนที่ 4: การประมวลผลและการวิเคราะห์ข้อมูล (Data Processing)\n",
-          "คำนวณสรุปความนิยมในรายวิชา และตารางไขว้ (Cross-tabulation)"
+          "แยกรายวิชาที่คั่นด้วยเครื่องหมายลูกน้ำ (,) ออกเป็นรายวิชาเดี่ยวเพื่อคำนวณความนิยม"
         ]
       },
       {
@@ -311,11 +311,17 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "subject_counts = df['วิชาที่ชอบ'].value_counts().reset_index()\n",
+          "# แยกข้อมูลกรณีที่กรอกหลายวิชา (คั่นด้วยเครื่องหมายจุลภาค)\n",
+          "df['วิชาที่ชอบ'] = df['วิชาที่ชอบ'].astype(str).str.split(',')\n",
+          "df_exploded = df.explode('วิชาที่ชอบ')\n",
+          "# ลบช่องว่างส่วนเกินที่อาจติดมาระหว่างการแยกข้อความ\n",
+          "df_exploded['วิชาที่ชอบ'] = df_exploded['วิชาที่ชอบ'].str.strip()\n",
+          "\n",
+          "subject_counts = df_exploded['วิชาที่ชอบ'].value_counts().reset_index()\n",
           "subject_counts.columns = ['วิชาที่ชอบ', 'จำนวน (คน)']\n",
           "display(subject_counts)\n",
           "\n",
-          "crosstab_result = pd.crosstab(df['ระดับชั้น'], df['วิชาที่ชอบ'], margins=True, margins_name='รวม')\n",
+          "crosstab_result = pd.crosstab(df_exploded['ระดับชั้น'], df_exploded['วิชาที่ชอบ'], margins=True, margins_name='รวม')\n",
           "display(crosstab_result)"
         ]
       },
@@ -348,7 +354,7 @@ function generateIpynbFile() {
           "plt.show()\n",
           "\n",
           "plt.figure(figsize=(12, 6))\n",
-          "sns.countplot(data=df, x='ระดับชั้น', hue='วิชาที่ชอบ', palette='Set2')\n",
+          "sns.countplot(data=df_exploded, x='ระดับชั้น', hue='วิชาที่ชอบ', palette='Set2')\n",
           "plt.title('วิชาที่ชอบจำแนกตามระดับชั้นการศึกษา', fontsize=16, fontweight='bold', pad=15)\n",
           "plt.xlabel('ระดับชั้น', fontsize=12)\n",
           "plt.ylabel('จำนวนนักเรียน (คน)', fontsize=12)\n",
