@@ -214,7 +214,7 @@ function generateIpynbFile() {
         cell_type: "markdown",
         metadata: {},
         source: [
-          "# 🧪 ใบงานการทดลอง (Labsheet): การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
+          "# 🧪 FinalProject: การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
           "**รายวิชา:** วิทยาศาสตร์ข้อมูลและการวิเคราะห์ (Data Science & Analytics)  \n",
           "**แหล่งข้อมูล:** ฐานข้อมูลแบบ Realtime ผ่าน Supabase Data Collection System  \n",
           "---\n",
@@ -312,7 +312,7 @@ function generateIpynbFile() {
         outputs: [],
         source: [
           "# แยกข้อมูลกรณีที่กรอกหลายวิชา (คั่นด้วยเครื่องหมายจุลภาค)\n",
-          "df['วิชาที่ชอบ'] = df['วิชาที่ชอบ'].astype(str).str.split(',')\n",
+          "df['วิชาที่ชอบ'] = df['วิชาที่ชอบ'].astype(str).str.split(' ')\n",
           "df_exploded = df.explode('วิชาที่ชอบ')\n",
           "# ลบช่องว่างส่วนเกินที่อาจติดมาระหว่างการแยกข้อความ\n",
           "df_exploded['วิชาที่ชอบ'] = df_exploded['วิชาที่ชอบ'].str.strip()\n",
