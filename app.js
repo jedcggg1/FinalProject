@@ -214,7 +214,7 @@ function generateIpynbFile() {
         cell_type: "markdown",
         metadata: {},
         source: [
-          "# 🧪 FinalProject: การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
+          "# 🧪 ใบงานการทดลอง (Labsheet): การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
           "**รายวิชา:** วิทยาศาสตร์ข้อมูลและการวิเคราะห์ (Data Science & Analytics)  \n",
           "**แหล่งข้อมูล:** ฐานข้อมูลแบบ Realtime ผ่าน Supabase Data Collection System  \n",
           "---\n",
@@ -230,7 +230,7 @@ function generateIpynbFile() {
         metadata: {},
         source: [
           "## 📌 ขั้นตอนที่ 1: การเตรียมสภาพแวดล้อม และนำเข้าไลบรารี (Environment Setup)\n",
-          "ติดตั้งแพ็กเกจรองรับฟอนต์ภาษาไทย และนำเข้าไลบรารี `pandas`, `matplotlib`, `seaborn`"
+          "ดาวน์โหลดฟอนต์ภาษาไทย (TH Sarabun New) และนำเข้าไลบรารี `pandas`, `matplotlib`, `seaborn`"
         ]
       },
       {
@@ -239,15 +239,19 @@ function generateIpynbFile() {
         metadata: {},
         outputs: [],
         source: [
-          "!pip install pythaifont -q\n",
+          "!wget -q https://github.com/Phonbopit/sarabun-webfont/raw/master/fonts/thsarabunnew-webfont.ttf\n",
           "\n",
           "import pandas as pd\n",
+          "import matplotlib as mpl\n",
           "import matplotlib.pyplot as plt\n",
           "import seaborn as sns\n",
-          "import pythaifont\n",
           "\n",
-          "pythaifont.setup_thai_font()\n",
-          "sns.set_theme(style='whitegrid')"
+          "# ตั้งค่าฟอนต์ภาษาไทยให้ Matplotlib และ Seaborn\n",
+          "mpl.font_manager.fontManager.addfont('thsarabunnew-webfont.ttf')\n",
+          "mpl.rc('font', family='TH Sarabun New', size=14)\n",
+          "sns.set_theme(style='whitegrid', rc={'font.family': 'TH Sarabun New'})\n",
+          "\n",
+          "print('ตั้งค่าฟอนต์ภาษาไทยและนำเข้าไลบรารีสำเร็จ!')"
         ]
       },
       {
@@ -312,7 +316,7 @@ function generateIpynbFile() {
         outputs: [],
         source: [
           "# แยกข้อมูลกรณีที่กรอกหลายวิชา (คั่นด้วยเครื่องหมายจุลภาค)\n",
-          "df['วิชาที่ชอบ'] = df['วิชาที่ชอบ'].astype(str).str.split(' ')\n",
+          "df['วิชาที่ชอบ'] = df['วิชาที่ชอบ'].astype(str).str.split(',')\n",
           "df_exploded = df.explode('วิชาที่ชอบ')\n",
           "# ลบช่องว่างส่วนเกินที่อาจติดมาระหว่างการแยกข้อความ\n",
           "df_exploded['วิชาที่ชอบ'] = df_exploded['วิชาที่ชอบ'].str.strip()\n",
