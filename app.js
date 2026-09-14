@@ -214,7 +214,7 @@ function generateIpynbFile() {
         cell_type: "markdown",
         metadata: {},
         source: [
-          "# 🧪 ใบงานการทดลอง (Labsheet): การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
+          "# 🧪 FinalProject: การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
           "**รายวิชา:** วิทยาศาสตร์ข้อมูลและการวิเคราะห์ (Data Science & Analytics)  \n",
           "**แหล่งข้อมูล:** ฐานข้อมูลแบบ Realtime ผ่าน Supabase Data Collection System  \n",
           "---\n",
@@ -346,7 +346,7 @@ function generateIpynbFile() {
         outputs: [],
         source: [
           "plt.figure(figsize=(10, 5))\n",
-          "ax = sns.barplot(data=subject_counts, x='จำนวน (คน)', y='วิชาที่ชอบ', palette='mako')\n",
+          "ax = sns.barplot(data=subject_counts, x='จำนวน (คน)', y='วิชาที่ชอบ', hue='วิชาที่ชอบ', palette='mako', legend=False)",
           "plt.title('อันดับรายวิชาที่นักเรียนชอบเรียนมากที่สุด', fontsize=16, fontweight='bold', pad=15)\n",
           "plt.xlabel('จำนวนนักเรียน (คน)', fontsize=12)\n",
           "plt.ylabel('รายวิชา', fontsize=12)\n",
