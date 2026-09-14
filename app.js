@@ -214,7 +214,7 @@ function generateIpynbFile() {
         cell_type: "markdown",
         metadata: {},
         source: [
-          "# 🧪 FinalProject: การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
+          "# 🧪 ใบงานการทดลอง (Labsheet): การวิเคราะห์ข้อมูลความสนใจในรายวิชาของนักเรียน\n",
           "**รายวิชา:** วิทยาศาสตร์ข้อมูลและการวิเคราะห์ (Data Science & Analytics)  \n",
           "**แหล่งข้อมูล:** ฐานข้อมูลแบบ Realtime ผ่าน Supabase Data Collection System  \n",
           "---\n",
@@ -336,7 +336,7 @@ function generateIpynbFile() {
         metadata: {},
         source: [
           "## 📌 ขั้นตอนที่ 5: การนำเสนอผลด้วยแผนภาพ (Data Visualization)\n",
-          "แสดงแผนภาพสรุปอันดับรายวิชายอดนิยม และเปรียบเทียบตามระดับชั้น"
+          "แสดงแผนภาพสรุปอันดับรายวิชายอดนิยม และเปรียบเทียบตามระดับชั้น (เรียงตามลำดับชั้น)"
         ]
       },
       {
@@ -346,7 +346,8 @@ function generateIpynbFile() {
         outputs: [],
         source: [
           "plt.figure(figsize=(10, 5))\n",
-          "ax = sns.barplot(data=subject_counts, x='จำนวน (คน)', y='วิชาที่ชอบ', hue='วิชาที่ชอบ', palette='mako', legend=False)",
+          "# แก้ไข FutureWarning โดยเพิ่ม hue และ legend=False\n",
+          "ax = sns.barplot(data=subject_counts, x='จำนวน (คน)', y='วิชาที่ชอบ', hue='วิชาที่ชอบ', palette='mako', legend=False)\n",
           "plt.title('อันดับรายวิชาที่นักเรียนชอบเรียนมากที่สุด', fontsize=16, fontweight='bold', pad=15)\n",
           "plt.xlabel('จำนวนนักเรียน (คน)', fontsize=12)\n",
           "plt.ylabel('รายวิชา', fontsize=12)\n",
@@ -359,8 +360,10 @@ function generateIpynbFile() {
           "plt.tight_layout()\n",
           "plt.show()\n",
           "\n",
+          "# กำหนดลำดับการแสดงผลบนแกน X ให้เรียงจาก ม.1 ไป ม.6\n",
+          "grade_order = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6']\n",
           "plt.figure(figsize=(12, 6))\n",
-          "sns.countplot(data=df_exploded, x='ระดับชั้น', hue='วิชาที่ชอบ', palette='Set2')\n",
+          "sns.countplot(data=df_exploded, x='ระดับชั้น', hue='วิชาที่ชอบ', palette='Set2', order=grade_order)\n",
           "plt.title('วิชาที่ชอบจำแนกตามระดับชั้นการศึกษา', fontsize=16, fontweight='bold', pad=15)\n",
           "plt.xlabel('ระดับชั้น', fontsize=12)\n",
           "plt.ylabel('จำนวนนักเรียน (คน)', fontsize=12)\n",
@@ -389,6 +392,7 @@ function generateIpynbFile() {
   const jsonString = JSON.stringify(notebookData, null, 2);
   downloadBlob(jsonString, 'student_favorite_subjects_analysis.ipynb', 'application/json');
 }
+
 
 function downloadBlob(content, fileName, contentType) {
   const blob = new Blob([content], { type: contentType });
